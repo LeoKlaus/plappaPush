@@ -1,0 +1,7 @@
+{
+    "require": {
+        "php": "^8.2",
+        "edamov/pushok": "^0.15.6",
+        "ramsey/uuid": "^4.7"
+    }
+}
