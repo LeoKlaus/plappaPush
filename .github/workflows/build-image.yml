@@ -31,5 +31,5 @@ jobs:
           context: ./src
           push: true
           tags: |
-            ${{ steps.meta.outputs.owner }}/plappaPush:latest
-            ${{ steps.meta.outputs.owner }}/plappaPush:${{ github.ref_name }}
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.ref_name }}
