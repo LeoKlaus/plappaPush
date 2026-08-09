@@ -4,8 +4,7 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../db.php';
 require __DIR__ . '/../lib.php';
-
-use Ramsey\Uuid\Uuid;
+require __DIR__ . '/../pushTokenRepository.php';
 
 header('Content-Type: application/json');
 
@@ -44,16 +43,7 @@ if (array_key_exists('userId', $data)) {
 $connection = pushDbConnect();
 
 try {
-    if ($userId === null) {
-        $userId = Uuid::uuid4()->toString();
-    }
-    
-    pushDbQuery(
-        $connection,
-        'INSERT INTO pushtokens (devicetoken, user_id) VALUES ($1, $2)
-         ON CONFLICT (devicetoken) DO UPDATE SET user_id = EXCLUDED.user_id',
-        [$deviceToken, $userId]
-    );
+    $userId = registerDeviceToken($connection, $deviceToken, $userId);
 
     http_response_code(201);
     echo json_encode(['userId' => $userId]);

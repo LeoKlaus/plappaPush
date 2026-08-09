@@ -4,6 +4,7 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../db.php';
 require __DIR__ . '/../lib.php';
+require __DIR__ . '/../pushTokenRepository.php';
 
 use Pushok\AuthProvider;
 use Pushok\Client;
@@ -85,7 +86,7 @@ try {
             $statusCode = $response->getStatusCode();
             if ($statusCode === 410) {
                 // Device unregistered/uninstalled — stop sending to it.
-                pushDbQuery($connection, 'DELETE FROM pushtokens WHERE devicetoken = $1', [$response->getDeviceToken()]);
+                deleteDeviceToken($connection, $response->getDeviceToken());
             }
             if ($statusCode === 200) {
                 $sentCount++;

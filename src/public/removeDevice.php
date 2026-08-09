@@ -4,6 +4,7 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../db.php';
 require __DIR__ . '/../lib.php';
+require __DIR__ . '/../pushTokenRepository.php';
 
 header('Content-Type: application/json');
 
@@ -31,7 +32,7 @@ if (!isValidDeviceToken($deviceToken)) {
 
 $connection = pushDbConnect();
 try {
-    pushDbQuery($connection, 'DELETE FROM pushtokens WHERE devicetoken = $1', [$deviceToken]);
+    deleteDeviceToken($connection, $deviceToken);
     http_response_code(200);
     echo json_encode(['ok' => true]);
 } finally {

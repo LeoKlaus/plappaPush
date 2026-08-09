@@ -9,7 +9,8 @@
     },
     "autoload-dev": {
         "files": [
-            "lib.php"
+            "lib.php",
+            "pushTokenRepository.php"
         ]
     }
 }
