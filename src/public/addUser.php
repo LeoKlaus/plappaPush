@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../db.php';
+require __DIR__ . '/../lib.php';
 
 use Ramsey\Uuid\Uuid;
 
@@ -24,7 +25,7 @@ if (!is_array($data) || !isset($data['deviceToken']) || !is_string($data['device
 
 $deviceToken = $data['deviceToken'];
 
-if (!preg_match('/^[0-9a-fA-F]{32,200}$/', $deviceToken)) {
+if (!isValidDeviceToken($deviceToken)) {
     http_response_code(400);
     echo json_encode(['error' => 'deviceToken does not look like a valid APNs token.']);
     exit();
@@ -32,7 +33,7 @@ if (!preg_match('/^[0-9a-fA-F]{32,200}$/', $deviceToken)) {
 
 $userId = null;
 if (array_key_exists('userId', $data)) {
-    if (!is_string($data['userId']) || !preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $data['userId'])) {
+    if (!is_string($data['userId']) || !isValidUserId($data['userId'])) {
         http_response_code(400);
         echo json_encode(['error' => 'Invalid userId.']);
         exit();

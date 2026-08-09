@@ -9,6 +9,7 @@ RUN composer install \
     --no-interaction \
     --no-plugins \
     --no-scripts \
+    --no-dev \
     --prefer-dist
 
 FROM php:8.2-apache

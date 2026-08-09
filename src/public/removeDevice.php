@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../db.php';
+require __DIR__ . '/../lib.php';
 
 header('Content-Type: application/json');
 
@@ -22,7 +23,7 @@ if (!is_array($data) || !isset($data['deviceToken']) || !is_string($data['device
 
 $deviceToken = $data['deviceToken'];
 
-if (!preg_match('/^[0-9a-fA-F]{32,200}$/', $deviceToken)) {
+if (!isValidDeviceToken($deviceToken)) {
     http_response_code(400);
     echo json_encode(['error' => 'deviceToken does not look like a valid APNs token.']);
     exit();
