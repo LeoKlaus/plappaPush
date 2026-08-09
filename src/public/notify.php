@@ -9,8 +9,6 @@ require __DIR__ . '/../pushTokenRepository.php';
 use Pushok\AuthProvider;
 use Pushok\Client;
 use Pushok\Notification;
-use Pushok\Payload;
-use Pushok\Payload\Alert;
 
 header('Content-Type: application/json');
 
@@ -33,6 +31,7 @@ $rawBody = (string) $data['body'];
 
 [$body, $deepLink] = extractDeepLink($rawBody);
 $targets = resolvePlappaTargets($data['urls']);
+$isEpisodeEvent = isPodcastEpisodeEvent($deepLink);
 
 if (!$targets) {
     echo json_encode(['ok' => true, 'sent' => 0]);
@@ -62,16 +61,12 @@ try {
             continue;
         }
 
-        $alert = Alert::create()->setTitle($title)->setBody($body);
-        $payload = Payload::create()->setAlert($alert)->setSound('default');
-
         $custom = $deepLink;
         if ($target['instanceId'] !== null) {
             $custom['instanceId'] = $target['instanceId'];
         }
-        if ($custom) {
-            $payload->setCustomValue('plappa', $custom);
-        }
+
+        $payload = buildNotificationPayload($isEpisodeEvent, $title, $body, $custom);
 
         foreach ($deviceTokens as $deviceToken) {
             $client->addNotifications([new Notification($payload, $deviceToken)]);

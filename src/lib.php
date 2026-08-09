@@ -28,6 +28,46 @@ function extractDeepLink(string $body): array
     return [$stripped, $pairs];
 }
 
+/**
+ * Whether a decoded deep-link marker belongs to onPodcastEpisodeDownloaded — the only
+ * Audiobookshelf notification event whose marker carries an episodeId (see
+ * AbsNotificationEventCatalogue in the app for the full per-event variable list). Used to decide
+ * whether notify.php should send a silent/background push (app decides locally whether to show a
+ * notification and/or auto-download) instead of a regular alert push.
+ */
+function isPodcastEpisodeEvent(array $deepLink): bool
+{
+    return isset($deepLink['episodeId']);
+}
+
+/**
+ * Builds the APNs payload for one target — the actual episode-vs-everything-else branch, pulled
+ * out of notify.php so it's testable without a real APNs client or network call. Episode events
+ * get a silent/background push (Payload::setContentAvailability(true) — pushok's Request class
+ * derives apns-push-type/apns-priority from this automatically, see Request::prepareApnsHeaders)
+ * with title/body folded into the custom payload instead of aps.alert. Every other event keeps
+ * the regular alert+sound push.
+ */
+function buildNotificationPayload(bool $isEpisodeEvent, string $title, string $body, array $custom): \Pushok\Payload
+{
+    $payload = \Pushok\Payload::create();
+
+    if ($isEpisodeEvent) {
+        $payload->setContentAvailability(true);
+        $custom['title'] = $title;
+        $custom['body'] = $body;
+    } else {
+        $alert = \Pushok\Payload\Alert::create()->setTitle($title)->setBody($body);
+        $payload->setAlert($alert)->setSound('default');
+    }
+
+    if ($custom) {
+        $payload->setCustomValue('plappa', $custom);
+    }
+
+    return $payload;
+}
+
 function resolvePlappaTargets(array $urls): array
 {
     $targets = [];
