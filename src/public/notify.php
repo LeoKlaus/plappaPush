@@ -79,8 +79,9 @@ try {
 
         foreach ($responses as $response) {
             $statusCode = $response->getStatusCode();
-            if ($statusCode === 410) {
-                // Device unregistered/uninstalled — stop sending to it.
+            $errorReason = $response->getErrorReason();
+            if (shouldRemoveDeviceToken($statusCode, $errorReason)) {
+                // Token unregistered, or permanently invalid (bad/wrong-environment) - stop sending to it.
                 deleteDeviceToken($connection, $response->getDeviceToken());
             }
             if ($statusCode === 200) {
